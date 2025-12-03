@@ -1,0 +1,51 @@
+# Defects
+
+1) Quick start port/host flags ignored
+- **Command**: `python app.py --host=0.0.0.0 --port=8080`
+- **Expected**: App listens on 0.0.0.0:8080
+- **Actual**: App starts on http://127.0.0.1:5000
+- **Trace**:
+  ```
+  * Serving Flask app 'app'
+  * Debug mode: on
+  * Running on http://127.0.0.1:5000
+  Press CTRL+C to quit
+  ```
+
+2) Missing routes `/signup`, `/signin`, `/profile`
+- **Steps**: `GET /signup` (or `/signin`, `/profile`)
+- **Expected**: Register/login/profile pages
+- **Actual**: 404 Not Found
+- **Trace** (test client): `{'/signup': 404, '/signin': 404, '/profile': 404}`
+
+3) Missing API endpoints `/api/register`, `/api/login`
+- **Steps**: `POST /api/register` or `POST /api/login`
+- **Expected**: JSON endpoints returning 201/200
+- **Actual**: 404 Not Found
+- **Trace** (test client): `{'/api/register': 404, '/api/login': 404}`
+
+4) Email optional in README, but required in app
+- **Steps**: `POST /register` with `email=''`
+- **Expected**: Registration succeeds (email optional per README)
+- **Actual**: Validation error "This field is required"
+
+5) Password minimum length mismatch
+- **Steps**: `POST /register` with `password='abc'`
+- **Expected**: Accepted (README says min length 3)
+- **Actual**: Validation error "Field must be between 6 and 128 characters long"
+
+6) Database path mismatch
+- **Expected**: `data/database.sqlite3`
+- **Actual**: `app.db` at project root (per `app.config['DATABASE']`)
+
+7) Sessions storage mismatch
+- **Expected**: Redis
+- **Actual**: Default Flask secure cookie sessions (no Redis configuration)
+
+8) CSRF secret env var unused
+- **Expected**: `FLASK_SECRET` environment variable configures `SECRET_KEY`
+- **Actual**: `SECRET_KEY` hard-coded in `app.py`; `FLASK_SECRET` ignored
+
+9) README form fields mismatch
+- **Expected**: Registration form fields include `confirm_password`
+- **Actual**: Only `username`, `email`, `password`
