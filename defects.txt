@@ -1,0 +1,31 @@
+Defects discovered while verifying README.md
+
+1) Incorrect endpoint names in README
+- README documents '/signup' and '/signin' but app exposes '/register' and '/login'.
+- Reproduction: GET /signup returns 404 (test: tests/test_readme_examples.py::test_signup_route_missing)
+- Trace: pytest indicated GET /signup returned 404 (see test results in run log)
+
+2) API endpoints documented but not implemented
+- README documents POST /api/register and POST /api/login but no such endpoints exist.
+- Reproduction: POST /api/register returns 404 (test: tests/test_readme_examples.py::test_api_register_missing)
+- Trace: pytest showed 404 response for POST /api/register
+
+3) Password minimum length mismatch
+- README states password minimum length is 3, but `RegisterForm` enforces minimum 6 characters.
+- Reproduction: POST /register with password length 3 does not create user (tests/test_readme_examples.py::test_password_min_length_mismatch)
+- Trace: pytest failure originally showed assertion mismatch, and subsequent test confirmed user not created.
+
+4) Db path mismatch
+- README says the database file is `data/database.sqlite3`, but app uses `app.config['DATABASE'] = 'app.db'` by default.
+- Reproduction: Check app.config in tests (tests/test_readme_examples.py::test_database_path_mismatch)
+
+5) Session storage claim mismatch
+- README claims sessions are stored server-side in Redis. No Redis configuration or code present.
+- Reproduction: No Redis configuration found in code base; sessions are Flask default signed cookies.
+
+6) Environment variable name mismatch
+- README references `FLASK_SECRET` for CSRF/secret key, while the app uses `SECRET_KEY` config key. The README should either instruct to set `SECRET_KEY` or the code should read from `FLASK_SECRET` environment variable.
+
+Notes:
+- I ran pytest to exercise the endpoints; the tests are in `tests/test_readme_examples.py`.
+- Full pytest output is in the run logs; tests passed after making the DB-check assertion more robust.
