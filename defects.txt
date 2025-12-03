@@ -1,0 +1,73 @@
+# Documented Defects
+
+## 1) Quick Start ignores host/port flags
+- **Command**: `python app.py --host=0.0.0.0 --port=8080`
+- **Expected**: Server listens on `0.0.0.0:8080`.
+- **Actual**: Server binds to default `127.0.0.1:5000`.
+- **Trace (captured by redirecting stdout/stderr and terminating after 5s)**:
+```
+--- STDOUT ---
+ * Serving Flask app 'app'
+ * Debug mode: on
+--- STDERR ---
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5000
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 112-454-780
+```
+- **Root cause**: `app.py` does not parse CLI args; it calls `app.run(debug=True)` with default host/port.
+
+## 2) README routes do not exist
+- **Expected**: `/signup`, `/signin`, `/profile`, `/api/register`, `/api/login` exist as documented.
+- **Actual**: All return **404 Not Found**.
+- **Trace (Flask test client GETs)**:
+```
+/signup: status=404 NOT FOUND ...
+/signin: status=404 NOT FOUND ...
+/profile: status=404 NOT FOUND ...
+/api/register: status=404 NOT FOUND ...
+/api/login: status=404 NOT FOUND ...
+```
+
+## 3) Registration form fields mismatch
+- **README**: Fields `username`, `email` (optional), `password`, `confirm_password`.
+- **Code**: `/register` requires `username`, **required** `email`, `password`; no `confirm_password`.
+- **Repro**: `POST /register` with `{username: u1, password: 123456}` (no email).
+- **Actual**: Validation fails; form re-rendered with errors (HTTP 200).
+- **Trace snippet**:
+```
+POST /register missing email: status=200 OK ...
+```
+
+## 4) Password minimum length mismatch
+- **README**: Minimum length 3.
+- **Code**: `Length(min=6)` validator on `password` and `login`.
+- **Repro**: `POST /register` with `{username: u2, email: e@example.com, password: 123}`.
+- **Actual**: Validation fails; form re-rendered (HTTP 200).
+- **Trace snippet**:
+```
+POST /register short pwd: status=200 OK ...
+```
+
+## 5) `FLASK_SECRET` environment variable ignored
+- **README**: Use `FLASK_SECRET` for CSRF/secret configuration.
+- **Code**: `app.config['SECRET_KEY']` hard-coded; no environment variable read.
+
+## 6) Database location mismatch
+- **README**: `data/database.sqlite3`.
+- **Code**: `app.config['DATABASE'] = 'app.db'` at repo root.
+- **Trace**:
+```
+DB exists app.db: True
+DB exists data/database.sqlite3: False
+```
+
+## 7) Sessions not stored in Redis
+- **README**: Sessions stored server-side in Redis.
+- **Code**: Uses Flask-Login with default signed cookies; no Redis dependency.
+
+## 8) Test instructions invalid
+- **README**: `bash run_tests.sh`.
+- **Actual**: `run_tests.sh` absent; no tests provided in repo (prior to this audit).

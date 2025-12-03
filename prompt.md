@@ -2,7 +2,7 @@
 You are provided with a Flask-based project.
 Use .venv as environment
 Follow `README.md` to test all code examples. 
-Verify the conttent of readme actually run as documented.
+Verify the content of readme actually run as documented.
 Identify all mismatches between documentation and actual implementation.
 Generate `corrected_readme.md` with working examples.
 Print all discovered defects to `defects.txt` with error traces.
@@ -21,5 +21,3 @@ Print all discovered defects to `defects.txt` with error traces.
 4. `setup.sh` and `setup.ps1` - Bash and powershell file to setup the environment
 5. `test_files` - Test files to see if evertthing goes well
 6. `run_tests.sh` and `run_tests.ps1` - Test command of Bash and powershell to run testcases with pytest, all test should be passed
-
-
