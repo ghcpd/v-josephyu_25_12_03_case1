@@ -1,0 +1,159 @@
+README DEFECTS AND MISMATCHES
+=============================
+
+DEFECT #1: Incorrect Quick Start Command
+---------
+Location: README.md - Quick Start section
+Issue: The command uses non-existent flags
+  Documented: python app.py --host=0.0.0.0 --port=8080
+  Actual Code: app.run(debug=True) in app.py does not accept these flags
+  Error: TypeError: run() got unexpected keyword arguments '--host' and '--port'
+Reproduction:
+  $ python app.py --host=0.0.0.0 --port=8080
+  TypeError: run() got unexpected keyword arguments
+Expected Behavior: Should use environment variables or Flask's default configuration
+Fix: Use `flask run` or modify app.run(host='0.0.0.0', port=8080)
+
+---
+
+DEFECT #2: Incorrect API Parameter Names
+---------
+Location: README.md - API Reference section
+Issue: JSON field names in API documentation don't match form validation
+  Documented POST /api/register:
+    { "user": "name", "pass": "123", "mail": "email@example.com" }
+  Documented POST /api/login:
+    { "user": "name", "pass": "123" }
+  Actual Form Fields:
+    LoginForm: username, password
+    RegisterForm: username, email, password
+  Missing: No JSON API endpoints exist in auth.py - only HTML form endpoints
+Error: There is no /api/register or /api/login implementation
+Fix: Either implement JSON API endpoints or update documentation to match HTML forms
+
+---
+
+DEFECT #3: Route Name Mismatch
+---------
+Location: README.md - Tutorial section
+Issue: README refers to endpoints that don't exist
+  Documented: /signup endpoint
+  Actual: /register endpoint (from auth_bp)
+  Documented: /signin endpoint
+  Actual: /login endpoint (from auth_bp)
+  Documented: /profile endpoint
+  Actual: /dashboard endpoint (in app.py)
+Error: 404 errors when accessing documented routes
+Fix: Update documentation to use correct route names: /register, /login, /dashboard
+
+---
+
+DEFECT #4: Incorrect API Response Status Codes
+---------
+Location: README.md - API Reference section
+Issue: No JSON API exists to return documented status codes
+  Documented: POST /api/register returns 201 Created
+  Documented: POST /api/login returns 200 OK
+  Actual: No /api/ endpoints implemented - only HTML form redirects
+Error: Endpoints don't exist
+Fix: Implement JSON API or remove from documentation
+
+---
+
+DEFECT #5: Database File Location Mismatch
+---------
+Location: README.md - Notes section
+Issue: Incorrect database path documented
+  Documented: database file is `data/database.sqlite3`
+  Actual: database file is `app.db` (configured in app.py config['DATABASE'])
+Error: Documentation misleads users about database location
+Fix: Update to show correct path: `app.db`
+
+---
+
+DEFECT #6: Redis Session Storage Not Implemented
+---------
+Location: README.md - Notes section
+Issue: Documentation claims Redis sessions but implementation uses Flask default
+  Documented: "Sessions are stored server-side in Redis"
+  Actual: Flask-Login uses in-memory session storage (no Redis configuration)
+  Missing: No redis client, no session backend configuration
+Error: Session configuration doesn't exist
+Fix: Either implement Redis or update docs to mention default Flask-Login session storage
+
+---
+
+DEFECT #7: FLASK_SECRET Environment Variable Not Used
+---------
+Location: README.md - Tutorial section
+Issue: Documentation mentions FLASK_SECRET but app doesn't use it
+  Documented: "Use environment variable `FLASK_SECRET` to configure CSRF"
+  Actual: app.py hardcodes SECRET_KEY as 'replace-with-a-strong-secret-key'
+  Missing: No os.environ.get('FLASK_SECRET') implementation
+Error: Environment variable is ignored
+Fix: Update app.py to use: app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET', 'default-key')
+
+---
+
+DEFECT #8: Password Minimum Length Mismatch
+---------
+Location: README.md - Notes section
+Issue: Documented password requirement doesn't match implementation
+  Documented: "Password minimum length is 3"
+  Actual: RegisterForm and LoginForm both require min length 6
+  Validators in auth.py: Length(min=6, max=128)
+Error: Users can't register with 3-character passwords as documented
+Fix: Update documentation to specify minimum 6 characters
+
+---
+
+DEFECT #9: Missing Fields in API Documentation
+---------
+Location: README.md - API Reference section
+Issue: API documentation incomplete
+  Missing: No confirm_password field mentioned in POST /api/register
+  Noted in tutorial: "register with fields: username, email, password, confirm_password"
+  But RegisterForm doesn't have confirm_password validation
+Error: Mismatch between tutorial and form implementation
+Fix: Either add confirm_password to form or remove from documentation
+
+---
+
+DEFECT #10: Missing Test File Reference
+---------
+Location: README.md - Notes section
+Issue: Documentation references test file but doesn't specify location
+  Documented: "To run tests: bash run_tests.sh"
+  Actual: run_tests.sh doesn't exist
+  Missing: No test files in project
+Error: Users cannot run tests as documented
+Fix: Create run_tests.sh, run_tests.ps1, and pytest test files
+
+---
+
+DEFECT #11: Incomplete Setup Instructions
+---------
+Location: README.md - From Scratch Setup
+Issue: Documentation doesn't cover all required packages
+  Documented: pip install flask flask-login flask-wtf wtforms
+  Actual requirements.txt includes: email_validator, Werkzeug (with specific versions)
+  Missing: email_validator needed for email validation
+Error: Setup by documentation alone won't work - email validation will fail
+Fix: Either update pip install command or direct users to use requirements.txt
+
+---
+
+SUMMARY
+-------
+Total Defects Found: 11
+Categories:
+  - Route/Endpoint Mismatches: 2 defects
+  - API Documentation Issues: 3 defects  
+  - Configuration/Environment Issues: 3 defects
+  - Implementation Gaps: 2 defects
+  - Documentation Inconsistencies: 1 defect
+
+Severity Levels:
+  CRITICAL (blocks functionality): 5 defects (#1, #2, #3, #4, #6)
+  HIGH (incorrect behavior): 4 defects (#5, #7, #8, #9)
+  MEDIUM (missing features): 2 defects (#10, #11)
