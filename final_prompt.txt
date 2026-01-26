@@ -21,4 +21,3 @@ Print all discovered defects to `defects.txt` with error traces.
 4. `setup.sh` and `setup.ps1` - Bash and powershell file to setup the environment
 5. `test_files` - Test files to see if evertthing goes well
 6. `run_tests.sh` and `run_tests.ps1` - Test command of Bash and powershell to run testcases with pytest, all test should be passed
-
